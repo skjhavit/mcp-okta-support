@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  mcp-okta-support:
+    build: .
+    ports:
+      - "8000:8000"
+    environment:
+      - OKTA_ORG_URL=${OKTA_ORG_URL}
+      - OKTA_API_TOKEN=${OKTA_API_TOKEN}
+      - MCP_LOG_LEVEL=${MCP_LOG_LEVEL:-INFO}
+    env_file:
+      - .env
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import httpx; httpx.get('http://localhost:8000/health', timeout=5)"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  logs:
